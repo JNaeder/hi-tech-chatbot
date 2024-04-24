@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, TextField, Button } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 import ollama from "ollama/browser";
@@ -8,7 +8,13 @@ export default function HomePage() {
   const boxRef = useRef(null);
   const [message, setMessage] = useState("");
   const [chatReponse, setChatResponse] = useState("");
-  const [conversation, setConversation] = useState([]);
+  const [conversation, setConversation] = useState([
+    {
+      role: "system",
+      content:
+        "You are named Hi! Tech Helper. You want to assist the Hi! Tech team with IT support in a friendly way.",
+    },
+  ]);
   const [isReplying, setIsReplying] = useState(false);
 
   const submit = async () => {
@@ -21,8 +27,14 @@ export default function HomePage() {
     setMessage("");
   };
 
+  const keyboardCheck = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  };
+
   useEffect(() => {
-    // Scroll to the bottom when content changes
     if (boxRef.current) {
       boxRef.current.scrollTop = boxRef.current.scrollHeight;
     }
@@ -46,12 +58,12 @@ export default function HomePage() {
       };
       setConversation((prevData) => [...prevData, new_assistant_message]);
       setChatResponse("");
+      setIsReplying(false);
     };
     if (isReplying) {
       getResponse();
-      setIsReplying(false);
     }
-  }, [conversation]);
+  }, [conversation, isReplying]);
 
   return (
     <Box
@@ -69,23 +81,28 @@ export default function HomePage() {
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          gap: 2,
-          backgroundColor: "#00ABD2",
+          justifyContent: "center",
+          // gap: 2,
+          marginTop: 2,
+          height: "10vh",
+          width: "80%",
+          // backgroundColor: "green",
         }}
       >
         <img src={Logo} alt="Logo" width={50} />
 
-        <Typography variant="h4" color="white">
-          Hi! Tech Chat
-        </Typography>
+        {/* <Typography variant="h4" color="white">
+          Chat
+        </Typography> */}
       </Box>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          borderRadius: 10,
-          width: "50%",
+          width: "80%",
+          height: "100%",
+          paddingBottom: 2,
         }}
       >
         <Box
@@ -93,8 +110,8 @@ export default function HomePage() {
           sx={{
             overflowY: "scroll",
             backgroundColor: "white",
-            borderRadius: 2,
-            height: "68vh",
+            height: "70vh",
+            borderRadius: "10px",
             "&::-webkit-scrollbar": {
               width: "8px",
             },
@@ -108,9 +125,10 @@ export default function HomePage() {
           }}
         >
           {conversation.map((message, index) => {
+            if (message.role === "system") return null;
             return <MessageBubble key={index} message={message} />;
           })}
-          {chatReponse !== "" && (
+          {isReplying && (
             <MessageBubble
               message={{
                 role: "assistant",
@@ -119,23 +137,35 @@ export default function HomePage() {
             />
           )}
         </Box>
-        <TextField
-          multiline
-          maxRows={4}
-          value={message}
+        <Box
           sx={{
-            width: "100%",
-            "& .MuiInputBase-root": {
-              backgroundColor: "white",
-            },
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            // backgroundColor: "red",
+            height: "15vh",
           }}
-          onChange={(e) => {
-            setMessage(e.target.value);
-          }}
-        />
-        <Button variant="contained" onClick={submit}>
-          Submit
-        </Button>
+        >
+          <TextField
+            disabled={isReplying}
+            multiline
+            maxRows={4}
+            value={message}
+            sx={{
+              width: "100%",
+              "& .MuiInputBase-root": {
+                backgroundColor: "white",
+              },
+            }}
+            onChange={(e) => {
+              setMessage(e.target.value);
+            }}
+            onKeyDown={keyboardCheck}
+          />
+          <Button variant="contained" onClick={submit} fullWidth>
+            Submit
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

@@ -1,7 +1,10 @@
-import { Box, Typography, Avatar } from "@mui/material";
+import { Box, Typography, Avatar, CircularProgress } from "@mui/material";
+import { MuiMarkdown } from "mui-markdown";
+import Hi_Tech_Logo from "./imgs/Hi_Tech_Blue.png";
 
 export default function MessageBubble({ message }) {
   const { role, content } = message;
+  const name = role === "user" ? "You" : "Hi! Tech Helper";
   return (
     <>
       <Box
@@ -21,15 +24,22 @@ export default function MessageBubble({ message }) {
             gap: 1,
           }}
         >
-          <Avatar
-            sx={{
-              width: 30,
-              height: 30,
-            }}
-          />
-          <Typography variant="paragraph">{role}</Typography>
+          {content === "" ? (
+            <CircularProgress size={30} />
+          ) : (
+            <Avatar
+              src={role === "assistant" ? Hi_Tech_Logo : null}
+              sx={{
+                width: 30,
+                height: 30,
+              }}
+            />
+          )}
+          <Typography variant="paragraph">
+            <b>{name}</b>
+          </Typography>
         </Box>
-        <Typography variant="paragraph">{content}</Typography>
+        <MuiMarkdown>{content}</MuiMarkdown>
       </Box>
     </>
   );

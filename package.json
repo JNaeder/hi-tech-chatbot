@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
     "fs": "^0.0.1-security",
+    "mui-markdown": "^1.1.13",
     "ollama": "^0.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
