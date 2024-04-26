@@ -43,21 +43,46 @@ export default function HomePage() {
   useEffect(() => {
     const getResponse = async () => {
       let reply = "";
-      const response = await ollama.chat({
-        model: "llama3",
-        stream: true,
-        messages: conversation,
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ conversation: conversation }),
       });
-      for await (const part of response) {
-        reply += part.message.content;
-        setChatResponse((prevData) => prevData + part.message.content);
-      }
-      const new_assistant_message = {
-        role: "assistant",
-        content: reply,
+      const reader = response.body.getReader();
+
+      const processStream = async (reader) => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          const newvalue = new TextDecoder("utf-8").decode(value);
+          console.log(newvalue);
+          // reply += new TextDecoder("utf-8").decode(value);
+          // console.log(reply);
+          // setChatResponse((prevData) => prevData + reply);
+        }
       };
-      setConversation((prevData) => [...prevData, new_assistant_message]);
-      setChatResponse("");
+
+      processStream(reader);
+
+      // const response = await ollama.chat({
+      //   model: "llama3",
+      //   stream: true,
+      //   messages: conversation,
+      // });
+      // for await (const part of response) {
+      //   reply += part.message.content;
+      //   setChatResponse((prevData) => prevData + part.message.content);
+      // }
+      // const new_assistant_message = {
+      //   role: "assistant",
+      //   content: reply,
+      // };
+      // setConversation((prevData) => [...prevData, new_assistant_message]);
+      // setChatResponse("");
       setIsReplying(false);
     };
     if (isReplying) {
